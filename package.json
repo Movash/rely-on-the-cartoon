@@ -27,7 +27,7 @@
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
-    "lint:js": "eslint src/**/*.{js,jsx}",
+    "lint:js": "eslint src/**/*.{js,jsx,ts,tsx}",
     "prepare": "husky",
     "build:tailwind": "tailwindcss -i ./src/index.css -o ./src/output.css --watch",
     "dev": "concurrently \"npm start\" \"npm run build:tailwind\""
