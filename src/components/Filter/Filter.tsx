@@ -9,6 +9,15 @@ import styled from '@emotion/styled';
 import toast from 'react-hot-toast';
 import { Character } from '../../api/api.types';
 import { SelectChangeEvent } from '@mui/material';
+import { PaginationInfo } from '../../App';
+import { SetURLSearchParams } from 'react-router-dom';
+
+interface FilterProps {
+  setPersons: Dispatch<SetStateAction<Character[]>>;
+  setPaginationInfo: Dispatch<SetStateAction<PaginationInfo>>;
+  setIsLoading: Dispatch<SetStateAction<boolean>>;
+  setSearchParams: SetURLSearchParams;
+}
 
 interface FilterState {
   name: string;
@@ -30,10 +39,12 @@ const StyledTextField = styled(TextField)({
   },
 });
 
-const Filter: FC<{
-  setPersons: Dispatch<SetStateAction<Character[]>>;
-  setIsLoading: Dispatch<SetStateAction<boolean>>;
-}> = ({ setPersons, setIsLoading }) => {
+const Filter: FC<FilterProps> = ({
+  setPersons,
+  setPaginationInfo,
+  setIsLoading,
+  setSearchParams,
+}) => {
   const [state, setState] = useState<FilterState>({
     name: '',
     species: '',
@@ -94,8 +105,12 @@ const Filter: FC<{
         status: state.status,
         gender: state.gender,
       });
-      const data = response.data.results;
-      setPersons(data);
+      const { results, info } = response.data;
+      console.log(info);
+      setPersons(results);
+      setPaginationInfo(info);
+      setState(prevState => ({ ...prevState, shouldFetch: false }));
+      setSearchParams({ page: '1' });
     } catch (error) {
       toast.error('No results found.');
     }
@@ -107,12 +122,13 @@ const Filter: FC<{
         try {
           setIsLoading(true);
           const response = await getCharacters();
-          const data = response.data.results;
-          if (!data.length) {
+          const { results, info } = response.data;
+          if (!results.length) {
             toast.error('Something went wrong.');
             return;
           }
-          setPersons(data);
+          setPersons(results);
+          setPaginationInfo(info);
         } catch (error) {
           toast.error('Something went wrong.');
         } finally {
@@ -122,7 +138,7 @@ const Filter: FC<{
       fetchCharacters();
       setState(prevState => ({ ...prevState, shouldFetch: false }));
     }
-  }, [state, setPersons, setIsLoading]);
+  }, [state, setPersons, setIsLoading, setPaginationInfo]);
 
   return (
     <section className="mb-[50px] flex justify-center items-center space-x-4">
