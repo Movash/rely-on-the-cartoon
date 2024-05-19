@@ -1,14 +1,14 @@
 {
   "files": {
     "main.css": "/rely-on-the-cartoon/static/css/main.9f388938.css",
-    "main.js": "/rely-on-the-cartoon/static/js/main.678fce57.js",
+    "main.js": "/rely-on-the-cartoon/static/js/main.f4e12fa4.js",
     "index.html": "/rely-on-the-cartoon/index.html",
     "static/media/sprite.svg": "/rely-on-the-cartoon/static/media/sprite.616dff3eeba8e193925d6037a07911aa.svg",
     "main.9f388938.css.map": "/rely-on-the-cartoon/static/css/main.9f388938.css.map",
-    "main.678fce57.js.map": "/rely-on-the-cartoon/static/js/main.678fce57.js.map"
+    "main.f4e12fa4.js.map": "/rely-on-the-cartoon/static/js/main.f4e12fa4.js.map"
   },
   "entrypoints": [
     "static/css/main.9f388938.css",
-    "static/js/main.678fce57.js"
+    "static/js/main.f4e12fa4.js"
   ]
 }
