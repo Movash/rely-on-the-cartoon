@@ -83,6 +83,7 @@ export const App = () => {
           <CustomPagination
             paginationInfo={paginationInfo}
             paginate={paginate}
+            currentPage={currentPage}
           />
         </>
       )}
