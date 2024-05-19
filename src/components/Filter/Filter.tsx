@@ -2,21 +2,19 @@ import MenuItem from '@mui/material/MenuItem';
 import FormControl from '@mui/material/FormControl';
 import Select from '@mui/material/Select';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
-import { FC, Dispatch, useEffect, useState, SetStateAction } from 'react';
-import { getCharacters } from '../../api/TheRickAndMorty.api';
+import { FC, useState } from 'react';
 import { TextField } from '@mui/material';
 import styled from '@emotion/styled';
-import toast from 'react-hot-toast';
-import { Character } from '../../api/api.types';
 import { SelectChangeEvent } from '@mui/material';
-import { PaginationInfo } from '../../App';
-import { SetURLSearchParams } from 'react-router-dom';
 
 interface FilterProps {
-  setPersons: Dispatch<SetStateAction<Character[]>>;
-  setPaginationInfo: Dispatch<SetStateAction<PaginationInfo>>;
-  setIsLoading: Dispatch<SetStateAction<boolean>>;
-  setSearchParams: SetURLSearchParams;
+  onFilterChange: (filters: any) => void;
+  initialFilters: {
+    name: string;
+    species: string;
+    status: string;
+    gender: string;
+  };
 }
 
 interface FilterState {
@@ -24,11 +22,7 @@ interface FilterState {
   species: string;
   status: string;
   gender: string;
-  shouldFetch: boolean;
 }
-
-type ChangeHandler = (e: SelectChangeEvent<{ value: unknown }>) => void;
-type ClearFiltersHandler = () => void;
 
 const StyledTextField = styled(TextField)({
   '& .MuiInputLabel-root': {
@@ -39,18 +33,12 @@ const StyledTextField = styled(TextField)({
   },
 });
 
-const Filter: FC<FilterProps> = ({
-  setPersons,
-  setPaginationInfo,
-  setIsLoading,
-  setSearchParams,
-}) => {
+const Filter: FC<FilterProps> = ({ onFilterChange, initialFilters }) => {
   const [state, setState] = useState<FilterState>({
-    name: '',
-    species: '',
-    status: '',
-    gender: '',
-    shouldFetch: false,
+    name: initialFilters.name,
+    species: initialFilters.species,
+    status: initialFilters.status,
+    gender: initialFilters.gender,
   });
 
   const allSpecies = [
@@ -72,73 +60,23 @@ const Filter: FC<FilterProps> = ({
     return string.charAt(0).toUpperCase() + string.slice(1);
   }
 
-  const handleSpeciesChange: ChangeHandler = e => {
-    const currentSpecies = e.target.value as string;
-    setState(prevState => ({ ...prevState, species: currentSpecies }));
+  const handleChange =
+    (field: keyof FilterState) => (e: SelectChangeEvent<string>) => {
+      setState(prevState => ({
+        ...prevState,
+        [field]: e.target.value as string,
+      }));
+    };
+
+  const handleClick = () => {
+    onFilterChange(state);
   };
 
-  const handleStatusChange: ChangeHandler = e => {
-    const currentStatus = e.target.value as string;
-    setState(prevState => ({ ...prevState, status: currentStatus }));
+  const handleClearFilters = () => {
+    const clearedState = { name: '', species: '', status: '', gender: '' };
+    setState(clearedState);
+    onFilterChange(clearedState);
   };
-
-  const handleGenderChange: ChangeHandler = e => {
-    const currentGender = e.target.value as string;
-    setState(prevState => ({ ...prevState, gender: currentGender }));
-  };
-
-  const handleClearFilters: ClearFiltersHandler = () => {
-    setState({
-      name: '',
-      species: '',
-      status: '',
-      gender: '',
-      shouldFetch: true,
-    });
-  };
-
-  const handleClick = async () => {
-    try {
-      const response = await getCharacters({
-        name: state.name,
-        species: state.species,
-        status: state.status,
-        gender: state.gender,
-      });
-      const { results, info } = response.data;
-      console.log(info);
-      setPersons(results);
-      setPaginationInfo(info);
-      setState(prevState => ({ ...prevState, shouldFetch: false }));
-      setSearchParams({ page: '1' });
-    } catch (error) {
-      toast.error('No results found.');
-    }
-  };
-
-  useEffect(() => {
-    if (state.shouldFetch) {
-      const fetchCharacters = async () => {
-        try {
-          setIsLoading(true);
-          const response = await getCharacters();
-          const { results, info } = response.data;
-          if (!results.length) {
-            toast.error('Something went wrong.');
-            return;
-          }
-          setPersons(results);
-          setPaginationInfo(info);
-        } catch (error) {
-          toast.error('Something went wrong.');
-        } finally {
-          setIsLoading(false);
-        }
-      };
-      fetchCharacters();
-      setState(prevState => ({ ...prevState, shouldFetch: false }));
-    }
-  }, [state, setPersons, setIsLoading, setPaginationInfo]);
 
   return (
     <section className="mb-[50px] flex justify-center items-center space-x-4">
@@ -152,11 +90,10 @@ const Filter: FC<FilterProps> = ({
       />
       <FormControl className="w-56 h-12">
         <Select
-          // @ts-ignore
           value={state.species}
           displayEmpty
           inputProps={{ 'aria-label': 'Without label' }}
-          onChange={handleSpeciesChange}
+          onChange={handleChange('species')}
           IconComponent={KeyboardArrowDownIcon}
           className="h-12"
         >
@@ -170,11 +107,10 @@ const Filter: FC<FilterProps> = ({
       </FormControl>
       <FormControl className="w-56 h-12">
         <Select
-          // @ts-ignore
           value={state.status}
           displayEmpty
           inputProps={{ 'aria-label': 'Without label' }}
-          onChange={handleStatusChange}
+          onChange={handleChange('status')}
           IconComponent={KeyboardArrowDownIcon}
           className="h-12"
         >
@@ -188,11 +124,10 @@ const Filter: FC<FilterProps> = ({
       </FormControl>
       <FormControl className="w-56 h-12">
         <Select
-          // @ts-ignore
           value={state.gender}
           displayEmpty
           inputProps={{ 'aria-label': 'Without label' }}
-          onChange={handleGenderChange}
+          onChange={handleChange('gender')}
           IconComponent={KeyboardArrowDownIcon}
           className="h-12"
         >
