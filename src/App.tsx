@@ -29,13 +29,24 @@ export const App = () => {
   });
 
   const pageParam = searchParams.get('page');
+  const nameParam = searchParams.get('name') || '';
+  const speciesParam = searchParams.get('species') || '';
+  const statusParam = searchParams.get('status') || '';
+  const genderParam = searchParams.get('gender') || '';
+
   const currentPage = pageParam ? parseInt(pageParam, 10) : 1;
 
   useEffect(() => {
     const fetchCharacters = async () => {
       try {
         setIsLoading(true);
-        const response = await getCharacters({ page: currentPage });
+        const response = await getCharacters({
+          page: currentPage,
+          name: nameParam,
+          species: speciesParam,
+          status: statusParam,
+          gender: genderParam,
+        });
         const { info, results } = response.data;
         if (!results.length) {
           toast.error('Something went wrong.');
@@ -50,21 +61,23 @@ export const App = () => {
       }
     };
     fetchCharacters();
-  }, [currentPage]);
+  }, [currentPage, genderParam, nameParam, speciesParam, statusParam]);
 
-  const paginate = async (pageNumber: number) => {
-    setSearchParams({ page: pageNumber.toString() });
-    try {
-      setIsLoading(true);
-      const response = await getCharacters({ page: pageNumber });
-      const { info, results } = response.data;
-      setPersons(results);
-      setPaginationInfo(info);
-    } catch (error) {
-      toast.error('Something went wrong.');
-    } finally {
-      setIsLoading(false);
-    }
+  const paginate = (pageNumber: number) => {
+    const params = Object.fromEntries(searchParams);
+    params.page = pageNumber.toString();
+    Object.keys(params).forEach(key => {
+      if (!params[key]) delete params[key];
+    });
+    setSearchParams(params);
+  };
+
+  const handleFilterChange = (filters: any) => {
+    const params = { ...filters, page: '1' };
+    Object.keys(params).forEach(key => {
+      if (!params[key]) delete params[key];
+    });
+    setSearchParams(params);
   };
 
   return (
@@ -74,17 +87,22 @@ export const App = () => {
       ) : (
         <>
           <Filter
-            setPersons={setPersons}
-            setPaginationInfo={setPaginationInfo}
-            setIsLoading={setIsLoading}
-            setSearchParams={setSearchParams}
+            onFilterChange={handleFilterChange}
+            initialFilters={{
+              name: nameParam,
+              species: speciesParam,
+              status: statusParam,
+              gender: genderParam,
+            }}
           />
           <PersonsList persons={persons} />
-          <CustomPagination
-            paginationInfo={paginationInfo}
-            paginate={paginate}
-            currentPage={currentPage}
-          />
+          {paginationInfo.pages > 1 && (
+            <CustomPagination
+              paginationInfo={paginationInfo}
+              paginate={paginate}
+              currentPage={currentPage}
+            />
+          )}
         </>
       )}
       <Toaster />
