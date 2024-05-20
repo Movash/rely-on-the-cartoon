@@ -8,52 +8,41 @@ import toast, { Toaster } from 'react-hot-toast';
 import CustomPagination from './components/CustomPagination/CustomPagination';
 import { useSearchParams } from 'react-router-dom';
 
-export interface PaginationInfo {
-  count: number;
-  pages: number;
-  next: string | null;
-  prev: string | null;
-}
-
 export const App = () => {
   const [persons, setPersons] = useState<Character[]>([]);
+  const [filteredPersons, setFilteredPersons] = useState<Character[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
   const [searchParams, setSearchParams] = useSearchParams();
-
-  const [paginationInfo, setPaginationInfo] = useState<PaginationInfo>({
-    count: 0,
-    pages: 0,
-    next: null,
-    prev: null,
-  });
 
   const pageParam = searchParams.get('page');
   const nameParam = searchParams.get('name') || '';
   const speciesParam = searchParams.get('species') || '';
   const statusParam = searchParams.get('status') || '';
   const genderParam = searchParams.get('gender') || '';
+  const sortOrderParam = searchParams.get('sortOrder') || '';
 
   const currentPage = pageParam ? parseInt(pageParam, 10) : 1;
+  const personsPerPage = 20;
 
   useEffect(() => {
     const fetchCharacters = async () => {
       try {
         setIsLoading(true);
-        const response = await getCharacters({
-          page: currentPage,
-          name: nameParam,
-          species: speciesParam,
-          status: statusParam,
-          gender: genderParam,
-        });
-        const { info, results } = response.data;
-        if (!results.length) {
-          toast.error('Something went wrong.');
-          return;
+        const allCharacters: Character[] = [];
+        let page = 1;
+        let hasMore = true;
+
+        while (hasMore) {
+          const response = await getCharacters({ page });
+          const { info, results } = response.data;
+          allCharacters.push(...results);
+          hasMore = !!info.next;
+          page += 1;
         }
-        setPersons(results);
-        setPaginationInfo(info);
+
+        setPersons(allCharacters);
+        setFilteredPersons(allCharacters);
       } catch (error) {
         toast.error('Something went wrong.');
       } finally {
@@ -61,7 +50,68 @@ export const App = () => {
       }
     };
     fetchCharacters();
-  }, [currentPage, genderParam, nameParam, speciesParam, statusParam]);
+  }, []);
+
+  useEffect(() => {
+    let filtered = [...persons];
+
+    if (nameParam) {
+      filtered = filtered.filter(person =>
+        person.name.toLowerCase().includes(nameParam.toLowerCase())
+      );
+    }
+
+    if (speciesParam) {
+      filtered = filtered.filter(person =>
+        person.species.toLowerCase().includes(speciesParam.toLowerCase())
+      );
+    }
+
+    if (statusParam) {
+      filtered = filtered.filter(
+        person => person.status.toLowerCase() === statusParam.toLowerCase()
+      );
+    }
+
+    if (genderParam) {
+      filtered = filtered.filter(
+        person => person.gender.toLowerCase() === genderParam.toLowerCase()
+      );
+    }
+
+    if (sortOrderParam) {
+      if (sortOrderParam === 'ascending') {
+        filtered.sort((a, b) => a.name.localeCompare(b.name));
+      } else if (sortOrderParam === 'descending') {
+        filtered.sort((a, b) => b.name.localeCompare(a.name));
+      }
+    }
+
+    setFilteredPersons(filtered);
+  }, [
+    nameParam,
+    speciesParam,
+    statusParam,
+    genderParam,
+    sortOrderParam,
+    persons,
+  ]);
+
+  const sortPersons = (personsToSort: Character[], sortOrder: string) => {
+    if (sortOrder === 'ascending') {
+      return personsToSort.sort((a, b) => a.name.localeCompare(b.name));
+    } else if (sortOrder === 'descending') {
+      return personsToSort.sort((a, b) => b.name.localeCompare(a.name));
+    }
+    return personsToSort;
+  };
+
+  const indexOfLastPerson = currentPage * personsPerPage;
+  const indexOfFirstPerson = indexOfLastPerson - personsPerPage;
+  const currentPersons = sortPersons(filteredPersons, sortOrderParam).slice(
+    indexOfFirstPerson,
+    indexOfLastPerson
+  );
 
   const paginate = (pageNumber: number) => {
     const params = Object.fromEntries(searchParams);
@@ -93,12 +143,22 @@ export const App = () => {
               species: speciesParam,
               status: statusParam,
               gender: genderParam,
+              sortOrder: sortOrderParam,
             }}
           />
-          <PersonsList persons={persons} />
-          {paginationInfo.pages > 1 && (
+          <PersonsList persons={currentPersons} />
+          {filteredPersons.length > personsPerPage && (
             <CustomPagination
-              paginationInfo={paginationInfo}
+              paginationInfo={{
+                count: filteredPersons.length,
+                pages: Math.ceil(filteredPersons.length / personsPerPage),
+                next:
+                  currentPage <
+                  Math.ceil(filteredPersons.length / personsPerPage)
+                    ? (currentPage + 1).toString()
+                    : null,
+                prev: currentPage > 1 ? (currentPage - 1).toString() : null,
+              }}
               paginate={paginate}
               currentPage={currentPage}
             />
