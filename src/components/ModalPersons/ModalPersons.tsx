@@ -14,13 +14,23 @@ const ModalPersons: FC<ModalPersonsProps> = ({ person, isOpen, onClose }) => {
 
   useEffect(() => {
     Modal.setAppElement('#root');
-    if (isOpen) {
-      document.body.style.overflow = 'hidden';
-    } else {
-      document.body.style.overflow = 'auto';
-    }
+
+    const handleBodyScroll = (shouldHide: boolean) => {
+      if (shouldHide) {
+        const scrollbarWidth =
+          window.innerWidth - document.documentElement.clientWidth;
+        document.body.style.overflow = 'hidden';
+        document.body.style.paddingRight = `${scrollbarWidth}px`;
+      } else {
+        document.body.style.overflow = 'auto';
+        document.body.style.paddingRight = '0px';
+      }
+    };
+
+    handleBodyScroll(isOpen);
+
     return () => {
-      document.body.style.overflow = 'auto';
+      handleBodyScroll(false);
     };
   }, [isOpen]);
 
