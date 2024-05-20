@@ -1,6 +1,12 @@
 import { FC } from 'react';
-import { PaginationInfo } from '../../App';
 import sprite from '../../assets/icons/sprite.svg';
+
+export interface PaginationInfo {
+  count: number;
+  pages: number;
+  next: string | null;
+  prev: string | null;
+}
 
 interface PaginationProps {
   paginationInfo: PaginationInfo;
