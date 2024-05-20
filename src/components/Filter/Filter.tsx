@@ -7,21 +7,17 @@ import { TextField } from '@mui/material';
 import styled from '@emotion/styled';
 import { SelectChangeEvent } from '@mui/material';
 
-interface FilterProps {
-  onFilterChange: (filters: any) => void;
-  initialFilters: {
-    name: string;
-    species: string;
-    status: string;
-    gender: string;
-  };
-}
-
 interface FilterState {
   name: string;
   species: string;
   status: string;
   gender: string;
+  sortOrder: string;
+}
+
+interface FilterProps {
+  onFilterChange: (filters: any) => void;
+  initialFilters: FilterState;
 }
 
 const StyledTextField = styled(TextField)({
@@ -39,6 +35,7 @@ const Filter: FC<FilterProps> = ({ onFilterChange, initialFilters }) => {
     species: initialFilters.species,
     status: initialFilters.status,
     gender: initialFilters.gender,
+    sortOrder: initialFilters.sortOrder,
   });
 
   const allSpecies = [
@@ -55,6 +52,7 @@ const Filter: FC<FilterProps> = ({ onFilterChange, initialFilters }) => {
   ];
   const allStatuses = ['alive', 'dead', 'unknown'];
   const allGenders = ['male', 'female', 'genderless', 'unknown'];
+  const sortOptions = ['ascending', 'descending'];
 
   function capitalizeFirstLetter(string: string): string {
     return string.charAt(0).toUpperCase() + string.slice(1);
@@ -73,7 +71,13 @@ const Filter: FC<FilterProps> = ({ onFilterChange, initialFilters }) => {
   };
 
   const handleClearFilters = () => {
-    const clearedState = { name: '', species: '', status: '', gender: '' };
+    const clearedState = {
+      name: '',
+      species: '',
+      status: '',
+      gender: '',
+      sortOrder: '',
+    };
     setState(clearedState);
     onFilterChange(clearedState);
   };
@@ -139,6 +143,23 @@ const Filter: FC<FilterProps> = ({ onFilterChange, initialFilters }) => {
           ))}
         </Select>
       </FormControl>
+      <FormControl className="w-56 h-12">
+        <Select
+          value={state.sortOrder}
+          displayEmpty
+          inputProps={{ 'aria-label': 'Without label' }}
+          onChange={handleChange('sortOrder')}
+          IconComponent={KeyboardArrowDownIcon}
+          className="h-12"
+        >
+          <MenuItem value="">Sort by name</MenuItem>
+          {sortOptions.map((option, index) => (
+            <MenuItem key={index} value={option}>
+              {capitalizeFirstLetter(option)}
+            </MenuItem>
+          ))}
+        </Select>
+      </FormControl>
       <div className="flex gap-4">
         <button
           onClick={handleClick}
@@ -150,7 +171,7 @@ const Filter: FC<FilterProps> = ({ onFilterChange, initialFilters }) => {
           onClick={handleClearFilters}
           className="h-12 w-24 bg-red-500 text-white rounded-lg transition duration-300 ease-in-out transform hover:bg-red-700"
         >
-          Clear Filters
+          Clear
         </button>
       </div>
     </section>
