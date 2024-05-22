@@ -18,7 +18,7 @@ const PersonsListItem: FC<PersonsListItemProps> = ({ person }) => {
   return (
     <>
       <li
-        className="relative flex flex-col justify-between w-[266px] h-[426px] rounded-[14px] bg-[#ffe0b6] shadow-xl"
+        className="relative flex flex-col justify-between w-[266px] h-[426px] rounded-[14px] bg-[#ffe0b6] shadow-xl cursor-pointer transition-shadow hover:shadow-indigo-500/50"
         onClick={openModalToggle}
       >
         <div className="flex flex-col justify-between items-center h-full">
