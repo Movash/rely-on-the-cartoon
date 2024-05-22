@@ -27,24 +27,16 @@ const CustomPagination: FC<PaginationProps> = ({
     pageNumbers.push(i);
   }
 
-  const handleNextPage = async () => {
+  const handleNextPage = () => {
     if (next) {
-      const nextPageNumber = parsePageNumber(next);
-      paginate(nextPageNumber);
+      paginate(currentPage + 1);
     }
   };
 
-  const handlePrevPage = async () => {
+  const handlePrevPage = () => {
     if (prev) {
-      const prevPageNumber = parsePageNumber(prev);
-      paginate(prevPageNumber);
+      paginate(currentPage - 1);
     }
-  };
-
-  const parsePageNumber = (url: string): number => {
-    const parsedUrl = new URL(url);
-    const page = parsedUrl.searchParams.get('page');
-    return page ? parseInt(page, 10) : 1;
   };
 
   return (
