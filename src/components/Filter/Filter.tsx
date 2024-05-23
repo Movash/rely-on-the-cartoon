@@ -1,11 +1,5 @@
-import MenuItem from '@mui/material/MenuItem';
-import FormControl from '@mui/material/FormControl';
-import Select from '@mui/material/Select';
-import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
-import { FC, useState } from 'react';
-import { TextField } from '@mui/material';
-import styled from '@emotion/styled';
-import { SelectChangeEvent } from '@mui/material';
+import { ChangeEvent, FC, useState } from 'react';
+import sprite from '../../assets/icons/sprite.svg';
 
 interface FilterState {
   name: string;
@@ -20,15 +14,6 @@ interface FilterProps {
   initialFilters: FilterState;
 }
 
-const StyledTextField = styled(TextField)({
-  '& .MuiInputLabel-root': {
-    marginTop: '-3px',
-  },
-  '& .MuiInputBase-root': {
-    height: '48px',
-  },
-});
-
 const Filter: FC<FilterProps> = ({ onFilterChange, initialFilters }) => {
   const [state, setState] = useState<FilterState>({
     name: initialFilters.name,
@@ -37,6 +22,7 @@ const Filter: FC<FilterProps> = ({ onFilterChange, initialFilters }) => {
     gender: initialFilters.gender,
     sortOrder: initialFilters.sortOrder,
   });
+  const [openSelect, setOpenSelect] = useState<string | null>(null);
 
   const allSpecies = [
     'human',
@@ -59,7 +45,8 @@ const Filter: FC<FilterProps> = ({ onFilterChange, initialFilters }) => {
   }
 
   const handleChange =
-    (field: keyof FilterState) => (e: SelectChangeEvent<string>) => {
+    (field: keyof FilterState) =>
+    (e: ChangeEvent<HTMLSelectElement | HTMLInputElement>) => {
       setState(prevState => ({
         ...prevState,
         [field]: e.target.value as string,
@@ -82,84 +69,99 @@ const Filter: FC<FilterProps> = ({ onFilterChange, initialFilters }) => {
     onFilterChange(clearedState);
   };
 
+  const handleSelectClick = (selectName: string) => {
+    setOpenSelect(prevOpenSelect =>
+      prevOpenSelect === selectName ? null : selectName
+    );
+  };
+
+  const renderSelect = (
+    label: string,
+    value: string,
+    options: string[],
+    option: string,
+    onChange: (e: ChangeEvent<HTMLSelectElement>) => void,
+    selectName: string
+  ) => (
+    <div className="w-56">
+      <label className="mb-1 block text-sm font-medium text-gray-700">
+        {label}
+      </label>
+      <div className="relative">
+        <select
+          value={value}
+          onChange={onChange}
+          onClick={() => handleSelectClick(selectName)}
+          onBlur={() => setOpenSelect(null)}
+          className="h-10 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm transition appearance-none focus:outline-none focus:ring-blue-500 focus:border-blue-500 hover:border-blue-400 cursor-pointer"
+          style={{ paddingRight: '28px' }}
+        >
+          <option value="">{option}</option>
+          {options.map((item, index) => (
+            <option key={index} value={item}>
+              {capitalizeFirstLetter(item)}
+            </option>
+          ))}
+        </select>
+        <div
+          className={`pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700 transition-transform ${
+            openSelect === selectName ? 'transform rotate-180' : ''
+          }`}
+        >
+          <svg className="w-[12px] h-[12px] stroke-[#121417]">
+            <use href={`${sprite}#icon-arrow-bottom`} />
+          </svg>
+        </div>
+      </div>
+    </div>
+  );
+
   return (
-    <section className="mb-[50px] flex justify-center items-center space-x-4">
-      <StyledTextField
-        label="Name"
-        value={state.name}
-        onChange={e =>
-          setState(prevState => ({ ...prevState, name: e.target.value }))
-        }
-        sx={{ width: '224px' }}
-      />
-      <FormControl className="w-56 h-12">
-        <Select
-          value={state.species}
-          displayEmpty
-          inputProps={{ 'aria-label': 'Without label' }}
-          onChange={handleChange('species')}
-          IconComponent={KeyboardArrowDownIcon}
-          className="h-12"
-        >
-          <MenuItem value="">All species</MenuItem>
-          {allSpecies.map((item, index) => (
-            <MenuItem key={index} value={item}>
-              {capitalizeFirstLetter(item)}
-            </MenuItem>
-          ))}
-        </Select>
-      </FormControl>
-      <FormControl className="w-56 h-12">
-        <Select
-          value={state.status}
-          displayEmpty
-          inputProps={{ 'aria-label': 'Without label' }}
-          onChange={handleChange('status')}
-          IconComponent={KeyboardArrowDownIcon}
-          className="h-12"
-        >
-          <MenuItem value="">All statuses</MenuItem>
-          {allStatuses.map((item, index) => (
-            <MenuItem key={index} value={item}>
-              {capitalizeFirstLetter(item)}
-            </MenuItem>
-          ))}
-        </Select>
-      </FormControl>
-      <FormControl className="w-56 h-12">
-        <Select
-          value={state.gender}
-          displayEmpty
-          inputProps={{ 'aria-label': 'Without label' }}
-          onChange={handleChange('gender')}
-          IconComponent={KeyboardArrowDownIcon}
-          className="h-12"
-        >
-          <MenuItem value="">All genders</MenuItem>
-          {allGenders.map((item, index) => (
-            <MenuItem key={index} value={item}>
-              {capitalizeFirstLetter(item)}
-            </MenuItem>
-          ))}
-        </Select>
-      </FormControl>
-      <FormControl className="w-56 h-12">
-        <Select
-          value={state.sortOrder}
-          displayEmpty
-          inputProps={{ 'aria-label': 'Without label' }}
-          onChange={handleChange('sortOrder')}
-          IconComponent={KeyboardArrowDownIcon}
-          className="h-12"
-        >
-          <MenuItem value="">Sort by name</MenuItem>
-          {sortOptions.map((option, index) => (
-            <MenuItem key={index} value={option}>
-              {capitalizeFirstLetter(option)}
-            </MenuItem>
-          ))}
-        </Select>
-      </FormControl>
+    <section className="mb-[50px] flex justify-center items-end space-x-4">
+      <div className="w-56">
+        <label className="mb-1 block text-sm font-medium text-gray-700">
+          Name
+        </label>
+        <input
+          type="text"
+          placeholder="Enter name"
+          value={state.name}
+          onChange={handleChange('name')}
+          className="h-10 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm transition focus:outline-none focus:ring-blue-500 focus:border-blue-500 hover:border-blue-400 cursor-pointer"
+        />
+      </div>
+      {renderSelect(
+        'Species',
+        state.species,
+        allSpecies,
+        'All species',
+        handleChange('species'),
+        'species'
+      )}
+      {renderSelect(
+        'Status',
+        state.status,
+        allStatuses,
+        'All statuses',
+        handleChange('status'),
+        'status'
+      )}
+      {renderSelect(
+        'Gender',
+        state.gender,
+        allGenders,
+        'All genders',
+        handleChange('gender'),
+        'gender'
+      )}
+      {renderSelect(
+        'Sort Order',
+        state.sortOrder,
+        sortOptions,
+        'Sort by name',
+        handleChange('sortOrder'),
+        'sortOrder'
+      )}
       <div className="flex gap-4">
         <button
           onClick={handleClick}
