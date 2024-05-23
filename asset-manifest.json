@@ -1,14 +1,14 @@
 {
   "files": {
-    "main.css": "/rely-on-the-cartoon/static/css/main.ca379e4f.css",
-    "main.js": "/rely-on-the-cartoon/static/js/main.67c3c37e.js",
+    "main.css": "/rely-on-the-cartoon/static/css/main.6252427b.css",
+    "main.js": "/rely-on-the-cartoon/static/js/main.d1c27d5c.js",
+    "static/media/sprite.svg": "/rely-on-the-cartoon/static/media/sprite.9882447180b7caa247300c6ff37a8224.svg",
     "index.html": "/rely-on-the-cartoon/index.html",
-    "static/media/sprite.svg": "/rely-on-the-cartoon/static/media/sprite.616dff3eeba8e193925d6037a07911aa.svg",
-    "main.ca379e4f.css.map": "/rely-on-the-cartoon/static/css/main.ca379e4f.css.map",
-    "main.67c3c37e.js.map": "/rely-on-the-cartoon/static/js/main.67c3c37e.js.map"
+    "main.6252427b.css.map": "/rely-on-the-cartoon/static/css/main.6252427b.css.map",
+    "main.d1c27d5c.js.map": "/rely-on-the-cartoon/static/js/main.d1c27d5c.js.map"
   },
   "entrypoints": [
-    "static/css/main.ca379e4f.css",
-    "static/js/main.67c3c37e.js"
+    "static/css/main.6252427b.css",
+    "static/js/main.d1c27d5c.js"
   ]
 }
